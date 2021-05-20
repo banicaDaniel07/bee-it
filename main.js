@@ -1,11 +1,8 @@
+// Start here by selecting elements
+
+const form = document.querySelector('.form');
 const theme = document.querySelector('#theme');
-const logo = document.querySelector('#logo');
-const container = document.querySelector('.fixed-container');
 const filter = document.querySelector('.fixed-container-filter');
-
-
-// Start here
-
 const nav = document.querySelector('.nav');
 const section1 = document.querySelector('.section-1');
 const section2 = document.querySelector('.section-2');
@@ -14,15 +11,37 @@ const section4 = document.querySelector('.section-4');
 const header = document.querySelector('.header');
 const navList = document.querySelector('.nav-list');
 const btnOrange = document.querySelector('.btn-orange');
+const clients = document.querySelectorAll('.client');
+const clientsNumbers = document.querySelectorAll('.client__number');
+const arrowUp = document.querySelector('.arrow__up');
+
+
 
 let themeType = 'light';
 let logoThemeType = 'light';
+
+let currentWidth = 1000;
+let currentWidthNumber = 50;
+let currentSlide = 0;
+
+
+let autoPlayTimer;
+
+// =========================================================
+
+// ======================= FUNCTIONS =======================
+
+// =========================================================
 
 //  ================= Change theme ================
 
 const changeTheme = () => {
     
+    localStorage.clear();
+
     themeType === 'light' ? themeType = 'dark' : themeType = 'light';
+    localStorage.setItem('themeType', themeType);
+
     filter.classList.toggle('hidden');
     theme.removeAttribute('class');
     
@@ -38,7 +57,6 @@ const changeTheme = () => {
         document.documentElement.style.setProperty('--border-grey', '#ddd');
         document.documentElement.style.setProperty('--copy-right-dark', '#222');
         theme.setAttribute( 'class',  'far fa-moon');
-        console.log("Clicked");
         changeLogo();
     }
     
@@ -54,12 +72,12 @@ const changeTheme = () => {
         document.documentElement.style.setProperty('--border-grey', 'rgba(248, 236, 236, 0.6)');
         document.documentElement.style.setProperty('--copy-right-dark', '#fff');
         theme.setAttribute( 'class',  'fas fa-sun');
-        console.log("Clicked");
         changeLogo();
     }
 }
 
 //  ================= load map into div function ================
+
 const loadMap = () => {
     var map = L.map('map', { scrollWheelZoom: false}).setView([45.4494614, 28.0474952,15.75], 15);
     
@@ -97,7 +115,6 @@ const smoothScroll = (event) => {
 //  ================= Change logo function ================
 
 const changeLogo = () => {
-    console.log("Changed Logo");
     logoThemeType === 'light' ? logoThemeType = 'dark' : logoThemeType = 'light';
 
     if(logoThemeType === 'dark'){
@@ -176,7 +193,7 @@ const showSection3 = (event) => {
                 sectionRight[i].style.transform = 'translateX(0)';
                 sectionLeft[i].style.opacity = 1;
                 sectionLeft[i].style.transform = 'translateX(0)';
-            }, i*1200 + 500)
+            }, i*1000 + 300)
         }
 
         observerSection3.unobserve(section3); 
@@ -206,11 +223,6 @@ const showSection4 = (event) => {
 
 //  ================= Testimaonials spread ================
 
-let currentWidth = 1000;
-let currentWidthNumber = 50;
-let currentSlide = 0;
-const clients = document.querySelectorAll('.client');
-const clientsNumbers = document.querySelectorAll('.client__number');
 const renderSlides = (currentSlide) => {
     clients.forEach( (client, index) => {
         client.style.transform = `translateX(${currentWidth * ( index - currentSlide)}px)`
@@ -219,7 +231,6 @@ const renderSlides = (currentSlide) => {
         client.style.transform = `translateX(${currentWidthNumber * ( index - currentSlide)}px)`
     })
 }
-renderSlides(currentSlide);
 
 //  ================= Slide Right  ================
 
@@ -249,13 +260,28 @@ const autoPlay = () => {
     slideRight();
 }
 
-let autoPlayTimer = setInterval( autoPlay, 4000);
 
-// ===========================================================
-
+//  ================= Nav sticky on scroll observer ================
 
 
-// ===========================================================
+const addStickyNav = (event) => {
+    const [entry] = event;
+    if(!entry.isIntersecting) {
+        nav.classList.add('nav-fixed');
+        changeLogo();
+    }
+    
+    if(entry.isIntersecting) {
+        nav.classList.remove('nav-fixed');
+        changeLogo();
+    }
+}
+
+// =========================================================
+
+// ======================= EVENT LISTENERS =======================
+
+// =========================================================
 
 
 //  ================= Remove spinner after load ================
@@ -267,7 +293,6 @@ window.addEventListener( 'load', () =>{
     
     if(window.pageYOffset > 938) {
         changeLogo();
-        console.log("offset");
     }
 });
 
@@ -284,16 +309,36 @@ theme.addEventListener( "click", (e) => {
     changeTheme();
 })
 
+
+form.addEventListener( 'submit' , (e) => {
+    e.preventDefault();
+    alert('Message was sent! Thank you!');
+    document.querySelector('.form__name').value = '';
+    document.querySelector('.form__number').value = '';
+    document.querySelector('.form__email').value = '';
+    document.querySelector('.form__message').value = '';
+})
+
 //  ================= Scroll Up ================
-const arrowUp = document.querySelector('.arrow__up');
 
 arrowUp.addEventListener( "click", (e) => {
     e.preventDefault();
     header.scrollIntoView({behavior: 'smooth'});
 })
 
+//  ================= Smooth scroll event ================
 
-//  ================= Nav sticky on scroll observer ================
+navList.addEventListener('click', smoothScroll);
+
+
+// =========================================================
+
+// ======================= ADDING OBSERVERS =======================
+
+// =========================================================
+
+
+//  =================== All options for the observers ===============
 
 const optionsNav = {
     root: null,
@@ -301,31 +346,6 @@ const optionsNav = {
     rootMargin: '-1px'
 }
 
- const addStickyNav = (event) => {
-    const [entry] = event;
-    if(!entry.isIntersecting) {
-        nav.classList.add('nav-fixed');
-        changeLogo();
-        console.log("nav add fix");
-    }
-    
-    if(entry.isIntersecting) {
-        nav.classList.remove('nav-fixed');
-        changeLogo();
-        console.log('nav remove fixed');
-    }
- }
-
- const observerNav = new IntersectionObserver( addStickyNav, optionsNav);
- observerNav.observe(header)
-
-
-//  ================= Smooth scroll event ================
-
-navList.addEventListener('click', smoothScroll);
-
-
-//  ================= Section 1 show on scroll observer ================
 const optionsShowSections = {
     root: null,
     threshold: 0.5
@@ -348,6 +368,11 @@ const optionsArrow = {
     rootMargin: '60px'
 }
 
+
+// ===================  Creating all observers ==================== 
+
+const observerNav = new IntersectionObserver( addStickyNav, optionsNav);
+observerNav.observe(header)
 const observerSection1 = new IntersectionObserver( showSection1, optionsShowSections);
 observerSection1.observe(section1);
 const observerSection2 = new IntersectionObserver( showSection2, optionsShowSections2);
@@ -370,3 +395,20 @@ clientButtonRight.addEventListener('click', slideRight);
 const clientButtonLeft = document.querySelector('.client__button-left');
 clientButtonLeft.addEventListener('click', slideLeft);
 
+
+
+function Init() {
+    
+    renderSlides(currentSlide);
+    autoPlayTimer = setInterval( autoPlay, 4000);
+    
+
+    const localTheme = localStorage.getItem('themeType');
+    if(localTheme) {
+        console.log(localTheme);
+        themeType = localTheme; 
+        changeTheme();
+    }
+}
+
+Init();
