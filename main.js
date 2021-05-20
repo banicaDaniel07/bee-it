@@ -37,12 +37,7 @@ let autoPlayTimer;
 
 const changeTheme = () => {
     
-    localStorage.clear();
 
-    themeType === 'light' ? themeType = 'dark' : themeType = 'light';
-    localStorage.setItem('themeType', themeType);
-
-    filter.classList.toggle('hidden');
     theme.removeAttribute('class');
     
     if(themeType === 'light') {
@@ -57,6 +52,7 @@ const changeTheme = () => {
         document.documentElement.style.setProperty('--border-grey', '#ddd');
         document.documentElement.style.setProperty('--copy-right-dark', '#222');
         theme.setAttribute( 'class',  'far fa-moon');
+        filter.classList.add('hidden');
         changeLogo();
     }
     
@@ -72,6 +68,7 @@ const changeTheme = () => {
         document.documentElement.style.setProperty('--border-grey', 'rgba(248, 236, 236, 0.6)');
         document.documentElement.style.setProperty('--copy-right-dark', '#fff');
         theme.setAttribute( 'class',  'fas fa-sun');
+        filter.classList.remove('hidden');
         changeLogo();
     }
 }
@@ -306,6 +303,9 @@ btnOrange.addEventListener( 'click', (e) => {
 
 theme.addEventListener( "click", (e) => {
     e.preventDefault();
+    themeType === 'light' ? themeType = 'dark' : themeType = 'light';
+    localStorage.clear();
+    localStorage.setItem('themeType', themeType);
     changeTheme();
 })
 
@@ -404,8 +404,7 @@ function Init() {
     
 
     const localTheme = localStorage.getItem('themeType');
-    if(localTheme) {
-        console.log(localTheme);
+    if(localTheme === 'dark') {
         themeType = localTheme; 
         changeTheme();
     }
